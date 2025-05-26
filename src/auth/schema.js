@@ -10,7 +10,13 @@ const loginSchema = z.object({
   password: z.string(),
 });
 
+// forgotPassword form Validation
+const forgotPasswordSchema = z.object({
+  email: emailValidation,
+});
+
 module.exports = {
   emailValidation,
   loginSchema,
+  forgotPasswordSchema
 };
