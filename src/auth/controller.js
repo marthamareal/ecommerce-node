@@ -1,6 +1,6 @@
 const prisma = require("../db");
 const bcrypt = require("bcrypt")
-const { userSchema } = require("../user/schema");
+const jwt = require("jsonwebtoken");
 const { loginSchema } = require("./schema");
 const { createRefreshToken, createAccessToken } = require("./service");
 
@@ -32,9 +32,36 @@ exports.loginUser = async (req, res) => {
     user.accessToken = accessToken
 
     res
-    .status(200).json(
+    .status(200)
+    .cookie( "jwt", refreshToken,{
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Only true for prod env
+        sameSite: "None",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        }
+    )
+    .json(
         {
             user
         }
     );
+};
+
+exports.refreshToken = async (req, res) => {
+    const token = req.cookies.jwt || req.headers["authorization"].split(" ")[1]
+    if(!token) res.status(401).json({ message: "No token"});
+    try {
+        // decode and verify token
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+        const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+        if (!user || user.refreshToken !== token) {
+            res.status(403).json({ message: "Forbidden" });
+        }
+        const accessToken = createAccessToken(user);
+        res.status(200).json({ accessToken });
+    }
+    catch (err) {
+        console.log(err)
+        res.status(403).json({ message: "Invalid Refresh Token" });
+    }
 };
