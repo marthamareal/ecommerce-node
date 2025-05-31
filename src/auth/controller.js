@@ -1,7 +1,11 @@
 const prisma = require("../db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { loginSchema, forgotPasswordSchema } = require("./schema");
+const {
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} = require("./schema");
 const {
   createRefreshToken,
   createAccessToken,
@@ -11,7 +15,6 @@ const {
 
 exports.loginUser = async (req, res) => {
   const validated = loginSchema.safeParse(req.body);
-  console.log(validated)
   if (!validated.success)
     return res
       .status(400)
@@ -88,5 +91,59 @@ exports.forgotPassword = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { token } = req.params;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_RESET_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    // Validate new password meets criteria
+    const validated = resetPasswordSchema.safeParse(req.body);
+    if (!validated.success)
+      res.status(400).json({ error: validated.error.flatten().fieldErrors });
+    // hash new password
+    const newPassword = await bcrypt.hash(validated.data.password, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: newPassword, refreshToken: null },
+    });
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.status(200).json({ message: "Password reset successfully" });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ message: "Invalid request or expired token" });
+  }
+};
+
+exports.logoutUser = async (req, res) => {
+  const token = req.cookies.jwt;
+  if (!token) res.status(401).json({ message: "No token" });
+  try {
+    // decode and verify token
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    await prisma.user.update({
+      where: { id: decoded.id },
+      data: { refreshToken: null },
+    });
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    res.status(200).json({ message: "Successfully logged out" });
+  } catch (err) {
+    console.log(err);
+    res.status(403).json({ message: "Invalid Refresh Token" });
   }
 };
