@@ -1,6 +1,7 @@
 const prisma = require("../db");
 const bcrypt = require("bcrypt");
-const { userSchema } = require("./schema")
+const { userSchema } = require("./schema");
+const sanitize = require("../utils");
 
 exports.createUser = async (req, res) => {
       const validated = userSchema.safeParse(req.body);
@@ -30,14 +31,28 @@ exports.createUser = async (req, res) => {
             password: hashedPassword,
           },
         });
-        res.status(201).json({
-          id: user.id,
-          email: user.email,
-          first_name: user.first_name,
-          last_name: user.last_name,
-        });
+        const safeUser = sanitize(updatedUser, ["password", "refreshToken"]);
+        res.status(201).json(safeUser);
       } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
       }
+};
+
+exports.updateUser = async (req, res) => {
+  const user = req.user;
+  const updates = req.body;
+  try {
+    const safeData = sanitize(updates, ["password", "refreshToken"]);
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: safeData,
+    });
+    const safeUser = sanitize(updatedUser, ["password", "refreshToken"])
+    res.status(200).json(safeUser)
+  }
+  catch (err){
+    console.log(err)
+    res.status(500).json({message: "Server error"});
+  }
 };
