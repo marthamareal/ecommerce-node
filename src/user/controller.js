@@ -53,6 +53,17 @@ exports.getUser = async (req, res) => {
   }
 };
 
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await prisma.user.findMany();
+    const safeUsers = sanitize(users, ["password", "refreshToken"]);
+    return res.status(200).json(safeUsers);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 exports.updateUser = async (req, res) => {
   const id = parseInt(req.params.id);
   const updates = req.body;
