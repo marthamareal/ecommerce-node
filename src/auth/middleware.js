@@ -22,7 +22,7 @@ const protect = async (req, res, next) => {
         const user = await prisma.user.findUnique({
             where: { email: decoded.email }
         });
-        if (!user) res.status(404).json({ message: "User not found" });
+        if (!user) return res.status(404).json({ message: "User not found" });
         // remove no read fields
 
         // Pass verified user to the request

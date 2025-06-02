@@ -31,11 +31,11 @@ exports.createUser = async (req, res) => {
             password: hashedPassword,
           },
         });
-        const safeUser = sanitize(updatedUser, ["password", "refreshToken"]);
-        res.status(201).json(safeUser);
+        const safeUser = sanitize(user, ["password", "refreshToken"]);
+        return res.status(201).json(safeUser);
       } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
       }
 };
 
@@ -49,10 +49,24 @@ exports.updateUser = async (req, res) => {
       data: safeData,
     });
     const safeUser = sanitize(updatedUser, ["password", "refreshToken"])
-    res.status(200).json(safeUser)
+    return res.status(200).json(safeUser)
   }
   catch (err){
     console.log(err)
-    res.status(500).json({message: "Server error"});
+    return res.status(500).json({message: "Server error"});
+  }
+};
+
+exports.deleteUser = async(req, res) => {
+  const id = req.user.id
+  try{
+    const deletedUser = await prisma.user.delete({
+      where: { id }
+    })
+    if(deletedUser) return res.status(200).json({message: "User account successfully deleted"})
+  }
+  catch (err) {
+    console.log(err)
+    return res.status(500).json({message: "Server error"})
   }
 };
