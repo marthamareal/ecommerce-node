@@ -20,7 +20,7 @@ const protect = async (req, res, next) => {
         const decoded = await jwt.verify(token, process.env.JWT_REFRESH_SECRET);
 
         const user = await prisma.user.findUnique({
-            where: { email: decoded.email }
+            where: { id: decoded.id }
         });
         if (!user) return res.status(404).json({ message: "User not found" });
         // remove no read fields

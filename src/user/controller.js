@@ -39,6 +39,20 @@ exports.createUser = async (req, res) => {
       }
 };
 
+exports.getUser = async(req, res) => {
+  const id = req.user.id
+  try {
+    const user = await prisma.user.findUnique({ where: { id }});
+    if(!user) return res.status(404).json({message: "User not found"})
+    const safeUser = sanitize(user, ["password", "refreshToken"])
+    return res.status(200).json(safeUser)
+  }
+  catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 exports.updateUser = async (req, res) => {
   const user = req.user;
   const updates = req.body;
