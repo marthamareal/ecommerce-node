@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { createUser, updateUser, deleteUser, getUser, getUsers } = require("./controller");
-const protect = require("../auth/middleware");
+const { protect } = require("../auth/middleware");
 const authorizeAccountOwmerOrAdmin = require("./middleware")
 
 // Register user

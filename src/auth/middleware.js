@@ -36,4 +36,15 @@ const protect = async (req, res, next) => {
     }
 };
 
-module.exports = protect;
+const isAdminUser = async (req, res, next) => {
+    const user = req.user // passed from protect middleware
+    if (!user.isAdmin) return res.status(403).json({
+        message: "Forbidden, Only Admin Users can perform this action"
+    })
+    next()
+};
+
+module.exports = {
+    protect,
+    isAdminUser
+};

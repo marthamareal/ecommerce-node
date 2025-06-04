@@ -9,6 +9,7 @@ app.use(cookieParser())
 // Routes
 app.use("/api/users", require("./user/routes"));
 app.use("/api/auth", require("./auth/routes"));
+app.use("/api/products", require("./product/routes"));
 
 
 module.exports = app
