@@ -54,8 +54,8 @@ exports.loginUser = async (req, res) => {
 };
 
 exports.refreshToken = async (req, res) => {
-  const token = req.cookies.jwt || req.headers["authorization"].split(" ")[1];
-  if (!token) return res.status(401).json({ message: "No token" });
+  const token = req.cookies.jwt || req.body.refreshToken
+  if (!token) return res.status(401).json({ message: "refreshToken not provided" });
   try {
     // decode and verify token
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
