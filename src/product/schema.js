@@ -15,7 +15,13 @@ const productInPutSchema = z.object({
   description: z.string().nullable().optional(),
 });
 
+const cartSchema = z.object({
+  productId: z.number(),
+  quantity: z.number().positive(" Price must be greater than 0").default(1)
+});
+
 module.exports = {
     productInPutSchema,
-    productOutPutSchema
-}
+    productOutPutSchema,
+    cartSchema
+};
