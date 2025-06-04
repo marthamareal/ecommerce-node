@@ -36,12 +36,8 @@ exports.getProducts = async (req, res) => {
 };
 
 exports.getProduct = async (req, res) => {
-    const id = parseInt(req.params.id);
     try {
-        // Get product from the database
-        const product = await prisma.product.findUnique({ where: { id } });
-        if (!product) return res.status(404).json({ message: "Product with given Id is not found" })
-
+        const product = req.product;
         const safeProduct = productOutPutSchema.parse(product);
         return res.status(201).json(safeProduct);
     } catch (err) {
@@ -51,16 +47,9 @@ exports.getProduct = async (req, res) => {
 };
 
 exports.deleteProduct = async (req, res) => {
-    const id = parseInt(req.params.id);
     try {
-        // Get product from the database
-        const product = await prisma.product.findUnique({ where: { id } });
-        if (!product)
-            return res
-                .status(404)
-                .json({ message: "Product with given Id is not found" });
-
-        const deleted = await prisma.product.delete({ where: { id } })
+        const product = req.product;
+        const deleted = await prisma.product.delete({ where: { id: product.id } })
         if (deleted) return res.status(200).json({ message: "Product is successfully deleted" });
     } catch (err) {
         console.error(err);
@@ -76,16 +65,10 @@ exports.updateProduct = async (req, res) => {
             .json({ error: validated.error.flatten().fieldErrors });
     }
     const data = validated.data;
-    const id = parseInt(req.params.id);
-
+    const product = req.product
     try {
-        const product = await prisma.product.findUnique({ where: { id } });
-        if (!product)
-            return res
-                .status(404)
-                .json({ message: "Product with given Id is not found" });
         // update product in the database
-        const updatedproduct = await prisma.product.update({ where: { id }, data });
+        const updatedproduct = await prisma.product.update({ where: { id: product.id }, data });
         const safeProduct = productOutPutSchema.parse(updatedproduct);
         return res.status(201).json(safeProduct);
     } catch (err) {
