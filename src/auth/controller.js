@@ -58,7 +58,7 @@ exports.loginUser = async (req, res) => {
 
 exports.refreshToken = async (req, res) => {
   const token = req.cookies.jwt || req.headers["authorization"].split(" ")[1];
-  if (!token) res.status(401).json({ message: "No token" });
+  if (!token) return res.status(401).json({ message: "No token" });
   try {
     // decode and verify token
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
@@ -67,17 +67,17 @@ exports.refreshToken = async (req, res) => {
       return res.status(403).json({ message: "Forbidden" });
     }
     const accessToken = createAccessToken(user);
-    res.status(200).json({ accessToken });
+    return res.status(200).json({ accessToken });
   } catch (err) {
     console.log(err);
-    res.status(403).json({ message: "Invalid Refresh Token" });
+    return res.status(403).json({ message: "Invalid Refresh Token" });
   }
 };
 
 exports.forgotPassword = async (req, res) => {
   const validated = forgotPasswordSchema.safeParse(req.body);
   if (!validated.success)
-    res.status(400).json({ error: validated.error.flatten().fieldErrors });
+    return res.status(400).json({ error: validated.error.flatten().fieldErrors });
   const { email } = validated.data;
   try {
     const user = await prisma.user.findUnique({ where: { email } });
@@ -87,10 +87,10 @@ exports.forgotPassword = async (req, res) => {
     const resetLink = `${process.env.CLIENT_URL}/api/auth/reset-password/${token}`;
     await sendPasswordResetEmail(email, resetLink);
 
-    res.status(200).json({ message: "Password reset email sent" });
+    return res.status(200).json({ message: "Password reset email sent" });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -105,7 +105,7 @@ exports.resetPassword = async (req, res) => {
     // Validate new password meets criteria
     const validated = resetPasswordSchema.safeParse(req.body);
     if (!validated.success)
-      res.status(400).json({ error: validated.error.flatten().fieldErrors });
+      return res.status(400).json({ error: validated.error.flatten().fieldErrors });
     // hash new password
     const newPassword = await bcrypt.hash(validated.data.password, 10);
 
@@ -119,16 +119,16 @@ exports.resetPassword = async (req, res) => {
       sameSite: "strict",
     });
 
-    res.status(200).json({ message: "Password reset successfully" });
+    return res.status(200).json({ message: "Password reset successfully" });
   } catch (err) {
     console.log(err);
-    res.status(400).json({ message: "Invalid request or expired token" });
+    return res.status(400).json({ message: "Invalid request or expired token" });
   }
 };
 
 exports.logoutUser = async (req, res) => {
   const token = req.cookies.jwt;
-  if (!token) res.status(401).json({ message: "No token" });
+  if (!token) return res.status(401).json({ message: "No token" });
   try {
     // decode and verify token
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
@@ -141,9 +141,9 @@ exports.logoutUser = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
     });
-    res.status(200).json({ message: "Successfully logged out" });
+    return res.status(200).json({ message: "Successfully logged out" });
   } catch (err) {
     console.log(err);
-    res.status(403).json({ message: "Invalid Refresh Token" });
+    return res.status(403).json({ message: "Invalid Refresh Token" });
   }
 };
