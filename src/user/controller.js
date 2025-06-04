@@ -40,10 +40,8 @@ exports.createUser = async (req, res) => {
 };
 
 exports.getUser = async (req, res) => {
-  const id = parseInt(req.params.id)
+  const user = req.user
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) return res.status(404).json({ message: "User not found" })
     const safeUser = sanitize(user, ["password", "refreshToken"])
     return res.status(200).json(safeUser)
   }
@@ -65,15 +63,12 @@ exports.getUsers = async (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = req.user.id;
   const updates = req.body;
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
     const safeData = sanitize(updates, ["password", "refreshToken"]);
     const updatedUser = await prisma.user.update({
-      where: { id: user.id },
+      where: { id },
       data: safeData,
     });
     const safeUser = sanitize(updatedUser, ["password", "refreshToken"])
@@ -86,7 +81,7 @@ exports.updateUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-  const id = parseInt(req.params.id);
+  const id = req.user.id;
   try {
     const deletedUser = await prisma.user.delete({
       where: { id }
