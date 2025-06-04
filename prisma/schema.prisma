@@ -16,3 +16,12 @@ model User {
   refreshToken String?
   isAdmin      Boolean @default(false)
 }
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  price       Float
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}

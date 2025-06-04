@@ -12,6 +12,7 @@ const {
   createResetPasswordToken,
   sendPasswordResetEmail,
 } = require("./service");
+const sanitize = require("../utils");
 
 exports.loginUser = async (req, res) => {
   const validated = loginSchema.safeParse(req.body);
@@ -37,12 +38,10 @@ exports.loginUser = async (req, res) => {
   // save refreshToken
   await prisma.user.update({ where: { id: user.id }, data: { refreshToken } });
 
-  // remove writeOnly fields
-  user.password = undefined;
-  user.refreshToken = undefined;
   // Add access token to response
   user.accessToken = accessToken;
 
+  const safeUser = sanitize(user, ["password", "refreshToken"]);
   res
     .status(200)
     .cookie("jwt", refreshToken, {
@@ -51,14 +50,12 @@ exports.loginUser = async (req, res) => {
       sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     })
-    .json({
-      user,
-    });
+    .json(safeUser);
 };
 
 exports.refreshToken = async (req, res) => {
-  const token = req.cookies.jwt || req.headers["authorization"].split(" ")[1];
-  if (!token) return res.status(401).json({ message: "No token" });
+  const token = req.cookies.jwt || req.body.refreshToken
+  if (!token) return res.status(401).json({ message: "refreshToken not provided" });
   try {
     // decode and verify token
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
