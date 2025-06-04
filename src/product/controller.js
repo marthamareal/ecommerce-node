@@ -1,4 +1,5 @@
 const prisma = require("../db");
+const sanitize = require("../utils");
 const { productInPutSchema, productOutPutSchema } = require("./schema");
 
 exports.createProduct = async (req, res) => {
@@ -16,6 +17,18 @@ exports.createProduct = async (req, res) => {
     const product = await prisma.product.create({ data });
     const safeProduct = productOutPutSchema.parse(product)
     return res.status(201).json(safeProduct);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getProducts = async (req, res) => {
+  try {
+    // Get products from the database
+    const products = await prisma.product.findMany();
+    const safeProducts = sanitize(products);
+    return res.status(201).json(safeProducts);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });
