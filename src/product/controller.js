@@ -210,7 +210,7 @@ exports.createOrder = async (req, res) => {
                         price: item.price
                     }))
                 }
-            }
+            }, include: { items: true }
         })
 
         if (order) {
@@ -225,7 +225,8 @@ exports.createOrder = async (req, res) => {
     }
 };
 exports.getOrder = async (req, res) => {
-
+    const order = req.order
+    return res.status(200).json(order)
 };
 
 exports.updateOrderStatus = async (req, res) => {

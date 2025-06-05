@@ -12,4 +12,19 @@ const checkProductExists = async (req, res, next) => {
     next();
 };
 
-module.exports = checkProductExists
+const checkOrderExists = async (req, res, next) => {
+    const id = parseInt(req.params.id);
+    const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
+    if (!order)
+        return res
+            .status(404)
+            .json({ message: "Order with given Id is not found" });
+
+    req.order = order;
+    next();
+};
+
+module.exports = {
+    checkProductExists,
+    checkOrderExists
+};
