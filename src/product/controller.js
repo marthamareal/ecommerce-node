@@ -96,7 +96,7 @@ exports.addToCart = async (req, res) => {
             .json({ error: safeData.error.flatten().fieldErrors });
     }
     const { productId, quantity } = safeData.data;
-    const { userId } = req.user.id;
+    const userId = req.user.id;
     try {
         // Find or create user cart
         let cart = await prisma.cart.findFirst({
@@ -116,7 +116,7 @@ exports.addToCart = async (req, res) => {
         if (!product) return res.status(404).json({ message: "Product not found" });
 
         // Add product to cart through cartItems or increament count if exists on cart
-        const item = cart.items.find((item) => item.productId == product.id);
+        const item = cart?.items?.find((item) => item.productId == product.id);
         // calculate Price based on quantity provided
         const price = product.price * quantity;
         if (item) {
@@ -132,7 +132,6 @@ exports.addToCart = async (req, res) => {
                 data: {
                     cartId: cart.id,
                     productId,
-                    userId,
                     quantity,
                     price,
                 },
@@ -181,4 +180,54 @@ exports.removeFromCart = async (req, res) => {
         console.error(err);
         return res.status(500).json({ message: "Server error" });
     }
+};
+
+exports.createOrder = async (req, res) => {
+    const userId = req.user.id
+    try {
+        const cart = await prisma.cart.findFirst({
+            where: { userId },
+            include: {
+                items: {
+                    include: { product: true }
+                }
+            }
+        })
+        if (!cart || cart.items.length == 0) {
+            return res.status(400).json({ message: "Cart is empty" });
+        }
+        // Calculate total amount from cartItems
+        const total = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+        // Create orede and order items
+        const order = await prisma.order.create({
+            data: {
+                userId,
+                total,
+                items: {
+                    create: cart.items.map(item => ({
+                        productId: item.productId,
+                        quantity: item.quantity,
+                        price: item.price
+                    }))
+                }
+            }
+        })
+
+        if (order) {
+            // clear the cart if order is created successfully
+            await prisma.cartItem.deleteMany({ where: { cartId: cart.id } })
+        }
+        return res.status(200).json(order)
+    }
+    catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+exports.getOrder = async (req, res) => {
+
+};
+
+exports.updateOrderStatus = async (req, res) => {
+
 };
