@@ -34,6 +34,6 @@ router.delete("/cart/items/remove", protect, removeFromCart);
 router.post("/orders/create", protect, createOrder);
 router.get("/orders/retrieve", protect, getOrders);
 router.get("/orders/:id", protect, validateIdParam, checkOrderExists, getOrder);
-router.patch("/orders/:id", protect, validateIdParam, updateOrderStatus);
+router.patch("/orders/:id", protect, validateIdParam, checkOrderExists, updateOrderStatus);
 
 module.exports = router;

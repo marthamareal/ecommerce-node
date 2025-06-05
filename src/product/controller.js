@@ -246,5 +246,24 @@ exports.getOrders = async (req, res) => {
 };
 
 exports.updateOrderStatus = async (req, res) => {
-
+    const order = req.order;
+    const status = req.body?.status;
+    const validStatuses = ["PENDING", "REJECTED", "ACCEPTED", "CANCLED", "PROCESSED"]
+    if (!status || !validStatuses.includes(status)) {
+        return res.status(400).json({
+            message: `status is required, and avalid status  must be includeded in [${validStatuses}]`
+        })
+    }
+    try {
+        const updatedOrder = await prisma.order.update({
+            where: { id: order.id },
+            data: { status },
+            include: { items: true }
+        })
+        res.status(200).json(updatedOrder)
+    }
+    catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Server error" });
+    }
 };
