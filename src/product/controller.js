@@ -229,6 +229,22 @@ exports.getOrder = async (req, res) => {
     return res.status(200).json(order)
 };
 
+exports.getOrders = async (req, res) => {
+    const { userId } = req.user.id;
+    try {
+        const orders = await prisma.order.findMany({
+            where: { userId },
+            include: { items: true },
+        });
+        if (!orders)
+            return res.status(404).json({ message: "No orders added yet" });
+        return res.status(200).json(orders);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
 exports.updateOrderStatus = async (req, res) => {
 
 };

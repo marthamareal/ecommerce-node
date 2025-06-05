@@ -11,6 +11,7 @@ const {
   removeFromCart,
   createOrder,
   getOrder,
+  getOrders,
   updateOrderStatus,
 } = require("./controller");
 const { validateIdParam } = require("../middleware")
@@ -30,8 +31,9 @@ router.get("/cart/items", protect, getCart);
 router.delete("/cart/items/remove", protect, removeFromCart);
 
 // Order
-router.post("/order/create", protect, createOrder);
-router.get("/order/:id", protect, validateIdParam, checkOrderExists, getOrder);
-router.patch("/order/:id", protect, validateIdParam, updateOrderStatus);
+router.post("/orders/create", protect, createOrder);
+router.get("/orders/retrieve", protect, getOrders);
+router.get("/orders/:id", protect, validateIdParam, checkOrderExists, getOrder);
+router.patch("/orders/:id", protect, validateIdParam, updateOrderStatus);
 
 module.exports = router;
