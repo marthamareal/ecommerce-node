@@ -20,8 +20,8 @@ const { checkProductExists, checkOrderExists } = require("./middleware")
 
 // Product
 router.post("/", protect, isAdminUser, createProduct);
-router.get("/", protect, getProducts);
-router.get("/:id", protect, validateIdParam, checkProductExists, getProduct);
+router.get("/", getProducts);
+router.get("/:id", validateIdParam, checkProductExists, getProduct);
 router.delete("/:id", protect, validateIdParam, checkProductExists, deleteProduct);
 router.patch("/:id", protect, isAdminUser, validateIdParam, checkProductExists, updateProduct);
 
