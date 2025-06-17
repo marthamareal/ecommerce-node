@@ -31,7 +31,7 @@ exports.getProducts = async (req, res) => {
         // Get products from the database
         const products = await prisma.product.findMany();
         const safeProducts = sanitize(products);
-        return res.status(201).json(safeProducts);
+        return res.status(200).json(safeProducts);
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Server error" });
@@ -42,7 +42,7 @@ exports.getProduct = async (req, res) => {
     try {
         const product = req.product;
         const safeProduct = productOutPutSchema.parse(product);
-        return res.status(201).json(safeProduct);
+        return res.status(200).json(safeProduct);
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Server error" });
@@ -149,7 +149,7 @@ exports.getCart = async (req, res) => {
     try {
         const cart = await prisma.cart.findFirst({
             where: { userId },
-            include: { items: true },
+            include: { items: { include: { product: true } } },
         });
         if (!cart)
             return res.status(404).json({ message: "No Items added in the cart" });
@@ -166,9 +166,8 @@ exports.removeFromCart = async (req, res) => {
     if (!productId) return res.status(400).json({ message: "Missing productId" });
     try {
         const cart = await prisma.cart.findFirst({
-            where: { userId }, include: { items: { include: { product: true } } }
+            where: { userId }
         });
-        console.log(cart)
         if (!cart) return res.status(404).json({ message: "No products on the cart" });
 
         const deleted = await prisma.cartItem.deleteMany({ where: { cartId: cart.id, productId: productId } });
