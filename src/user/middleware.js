@@ -1,3 +1,5 @@
+const prisma = require("../db");
+
 const authorizeAccountOwmerOrAdmin = (req, res, next) => {
   // This checks to grant access to only users who are admins and account owners.
   const id = req.params.id;

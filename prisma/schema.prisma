@@ -24,6 +24,7 @@ model Product {
   name        String
   price       Float
   description String?
+  featured    Boolean     @default(false)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   CartItem    CartItem[]

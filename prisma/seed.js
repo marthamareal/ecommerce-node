@@ -51,141 +51,111 @@ async function main() {
                 name: "Vision Meeting",
                 price: 312.49,
                 description: "Fill cost spring special range air operation play.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                featured: true
             },
             {
                 name: "River Truth",
                 price: 120.75,
                 description: "Every brother note history enjoy statement war region.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                featured: true
             },
             {
                 name: "Answer Country",
                 price: 257.99,
-                description: "Structure space movement coach much guess.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                description: "Structure space movement coach much guess."
             },
             {
                 name: "Window Begin",
                 price: 432.15,
                 description: "Front red moment affect action season entire resource.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                featured: true
             },
             {
                 name: "Mouth Expectation",
                 price: 210.00,
                 description: "Democratic land walk always scene politics share.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                featured: true
             },
             {
                 name: "Father Explain",
                 price: 76.32,
-                description: "Home century industry production improve.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                description: "Home century industry production improve."
             },
             {
                 name: "Option Magazine",
                 price: 298.65,
                 description: "Vote lay finally sign development.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                featured: true
             },
             {
                 name: "Speech Character",
                 price: 399.99,
-                description: "Total already answer gas same remain space.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                description: "Total already answer gas same remain space."
             },
             {
                 name: "Leg Customer",
                 price: 123.45,
                 description: "Ground strategy whose high door fire imagine.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                featured: true
             },
             {
-                name: "Game Account",
+                name: "Game Console",
                 price: 343.20,
                 description: "Whose college anything result wide hair clearly.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                featured: true
             },
             {
                 name: "Region Design",
                 price: 88.99,
-                description: "Mouth summer evidence night compare.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                description: "Mouth summer evidence night compare."
             },
             {
                 name: "Sense Office",
                 price: 279.75,
-                description: "Statement painting popular explain difference.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                description: "Statement painting popular explain difference."
             },
             {
                 name: "Energy Clock",
                 price: 320.50,
                 description: "Simply offer century wonder threat.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                featured: true
             },
             {
                 name: "Drive Thought",
                 price: 490.00,
-                description: "Result compare skin fire example.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                description: "Result compare skin fire example."
             },
             {
                 name: "Culture River",
                 price: 135.60,
-                description: "Glass serve mission explain.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                description: "Glass serve mission explain."
             },
             {
                 name: "Doctor Voice",
                 price: 312.30,
-                description: "Sign peace sport long within visit.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                description: "Sign peace sport long within visit."
             },
             {
                 name: "Art Plane",
                 price: 260.10,
                 description: "Tend future large lead region push.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                featured: true
             },
             {
                 name: "Measure Growth",
                 price: 141.25,
-                description: "Reality avoid door stage watch.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                description: "Reality avoid door stage watch."
             },
             {
                 name: "Media Success",
                 price: 389.90,
-                description: "Mean hold clearly couple type.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                description: "Mean hold clearly couple type."
             },
             {
                 name: "Garden Machine",
                 price: 99.99,
                 description: "Remain resource party trade person.",
-                createdAt: new Date(),
-                updatedAt: new Date()
+                featured: true
             }
         ]
     });

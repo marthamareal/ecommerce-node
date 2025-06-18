@@ -14,7 +14,12 @@ const checkProductExists = async (req, res, next) => {
 
 const checkOrderExists = async (req, res, next) => {
     const id = parseInt(req.params.id);
-    const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
+    const order = await prisma.order.findUnique(
+        {
+            where: { id },
+            include: { items: { include: { product: true } } },
+        }
+    );
     if (!order)
         return res
             .status(404)

@@ -145,14 +145,17 @@ exports.addToCart = async (req, res) => {
 };
 
 exports.getCart = async (req, res) => {
-    const { userId } = req.user.id;
+    const userId = req.user.id;
     try {
-        const cart = await prisma.cart.findFirst({
+        let cart = await prisma.cart.findFirst({
             where: { userId },
             include: { items: { include: { product: true } } },
         });
         if (!cart)
-            return res.status(404).json({ message: "No Items added in the cart" });
+            // create cart
+            cart = await prisma.cart.create({
+                data: { userId },
+            });
         return res.status(200).json(cart);
     } catch (err) {
         console.error(err);
@@ -161,7 +164,7 @@ exports.getCart = async (req, res) => {
 };
 
 exports.removeFromCart = async (req, res) => {
-    const { userId } = req.user.id;
+    const userId = req.user.id;
     const productId = req.body?.productId;
     if (!productId) return res.status(400).json({ message: "Missing productId" });
     try {
@@ -186,12 +189,8 @@ exports.createOrder = async (req, res) => {
     try {
         const cart = await prisma.cart.findFirst({
             where: { userId },
-            include: {
-                items: {
-                    include: { product: true }
-                }
-            }
-        })
+            include: { items: { include: { product: true } } },
+        });
         if (!cart || cart.items.length == 0) {
             return res.status(400).json({ message: "Cart is empty" });
         }
@@ -216,7 +215,7 @@ exports.createOrder = async (req, res) => {
             // clear the cart if order is created successfully
             await prisma.cartItem.deleteMany({ where: { cartId: cart.id } })
         }
-        return res.status(200).json(order)
+        return res.status(201).json(order)
     }
     catch (err) {
         console.error(err);
@@ -229,7 +228,7 @@ exports.getOrder = async (req, res) => {
 };
 
 exports.getOrders = async (req, res) => {
-    const { userId } = req.user.id;
+    const userId = req.user.id;
     try {
         const orders = await prisma.order.findMany({
             where: { userId },
