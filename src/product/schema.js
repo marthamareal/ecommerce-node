@@ -5,6 +5,7 @@ const productOutPutSchema = z.object({
     name: z.string(),
     price: z.number(),
     description: z.string().nullable().optional(),
+    featured: z.boolean().optional(),
     createdAt: z.date(),
     updatedAt: z.date()
 });

@@ -31,7 +31,7 @@ exports.getProducts = async (req, res) => {
         // Get products from the database
         const products = await prisma.product.findMany();
         const safeProducts = sanitize(products);
-        return res.status(201).json(safeProducts);
+        return res.status(200).json(safeProducts);
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Server error" });
@@ -42,7 +42,7 @@ exports.getProduct = async (req, res) => {
     try {
         const product = req.product;
         const safeProduct = productOutPutSchema.parse(product);
-        return res.status(201).json(safeProduct);
+        return res.status(200).json(safeProduct);
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Server error" });
@@ -145,14 +145,17 @@ exports.addToCart = async (req, res) => {
 };
 
 exports.getCart = async (req, res) => {
-    const { userId } = req.user.id;
+    const userId = req.user.id;
     try {
-        const cart = await prisma.cart.findFirst({
+        let cart = await prisma.cart.findFirst({
             where: { userId },
-            include: { items: true },
+            include: { items: { include: { product: true } } },
         });
         if (!cart)
-            return res.status(404).json({ message: "No Items added in the cart" });
+            // create cart
+            cart = await prisma.cart.create({
+                data: { userId },
+            });
         return res.status(200).json(cart);
     } catch (err) {
         console.error(err);
@@ -161,14 +164,13 @@ exports.getCart = async (req, res) => {
 };
 
 exports.removeFromCart = async (req, res) => {
-    const { userId } = req.user.id;
+    const userId = req.user.id;
     const productId = req.body?.productId;
     if (!productId) return res.status(400).json({ message: "Missing productId" });
     try {
         const cart = await prisma.cart.findFirst({
-            where: { userId }, include: { items: { include: { product: true } } }
+            where: { userId }
         });
-        console.log(cart)
         if (!cart) return res.status(404).json({ message: "No products on the cart" });
 
         const deleted = await prisma.cartItem.deleteMany({ where: { cartId: cart.id, productId: productId } });
@@ -187,12 +189,8 @@ exports.createOrder = async (req, res) => {
     try {
         const cart = await prisma.cart.findFirst({
             where: { userId },
-            include: {
-                items: {
-                    include: { product: true }
-                }
-            }
-        })
+            include: { items: { include: { product: true } } },
+        });
         if (!cart || cart.items.length == 0) {
             return res.status(400).json({ message: "Cart is empty" });
         }
@@ -217,7 +215,7 @@ exports.createOrder = async (req, res) => {
             // clear the cart if order is created successfully
             await prisma.cartItem.deleteMany({ where: { cartId: cart.id } })
         }
-        return res.status(200).json(order)
+        return res.status(201).json(order)
     }
     catch (err) {
         console.error(err);
@@ -230,7 +228,7 @@ exports.getOrder = async (req, res) => {
 };
 
 exports.getOrders = async (req, res) => {
-    const { userId } = req.user.id;
+    const userId = req.user.id;
     try {
         const orders = await prisma.order.findMany({
             where: { userId },
