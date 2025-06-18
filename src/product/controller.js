@@ -6,6 +6,17 @@ const {
     cartSchema,
 } = require("./schema");
 
+exports.getCategories = async (req, res) => {
+    try {
+        // Get products from the database
+        const categories = await prisma.category.findMany();
+        return res.status(200).json(categories);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
 exports.createProduct = async (req, res) => {
     const validated = productInPutSchema.safeParse(req.body);
     if (!validated.success) {
@@ -29,7 +40,7 @@ exports.createProduct = async (req, res) => {
 exports.getProducts = async (req, res) => {
     try {
         // Get products from the database
-        const products = await prisma.product.findMany();
+        const products = await prisma.product.findMany({ include: { category: true } });
         const safeProducts = sanitize(products);
         return res.status(200).json(safeProducts);
     } catch (err) {
