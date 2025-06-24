@@ -28,7 +28,7 @@ exports.createProduct = async (req, res) => {
 
     try {
         // Create product in the database
-        const product = await prisma.product.create({ data });
+        const product = await prisma.product.create({ data, include: { category: true } });
         const safeProduct = productOutPutSchema.parse(product);
         return res.status(201).json(safeProduct);
     } catch (err) {
