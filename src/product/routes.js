@@ -13,6 +13,7 @@ const {
   getOrder,
   getOrders,
   updateOrderStatus,
+  getCategories,
 } = require("./controller");
 const { validateIdParam } = require("../middleware")
 const { protect, isAdminUser } = require("../auth/middleware");
@@ -24,6 +25,9 @@ router.get("/", getProducts);
 router.get("/:id", validateIdParam, checkProductExists, getProduct);
 router.delete("/:id", protect, validateIdParam, checkProductExists, deleteProduct);
 router.patch("/:id", protect, isAdminUser, validateIdParam, checkProductExists, updateProduct);
+
+// Cartegory
+router.get("/categories/retrieve", getCategories);
 
 // Cart
 router.post("/cart/add", protect, addToCart);
