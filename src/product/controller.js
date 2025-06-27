@@ -256,15 +256,31 @@ exports.getOrder = async (req, res) => {
 };
 
 exports.getOrders = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     const userId = req.user.id;
     try {
-        const orders = await prisma.order.findMany({
+        const [orders, total] = await Promise.all([
+            prisma.order.findMany({
+            skip,
+            take:limit,
             where: { userId },
             include: { items: true },
-        });
+            orderBy: { createdAt: "desc" },
+            }),
+            prisma.order.count({ where: { userId } })
+        ]);
         if (!orders)
             return res.status(404).json({ message: "No orders added yet" });
-        return res.status(200).json(orders);
+
+        return res.status(200).json({
+            page,
+            pages: Math.ceil(total / limit),
+            total,
+            data: orders
+        });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Server error" });
