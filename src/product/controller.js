@@ -38,11 +38,28 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.getProducts = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
     try {
         // Get products from the database
-        const products = await prisma.product.findMany({ include: { category: true } });
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                skip,
+                take: limit,
+                orderBy: { createdAt: "desc" },
+                include: { category: true }
+            }),
+            prisma.product.count()
+        ])
         const safeProducts = sanitize(products);
-        return res.status(200).json(safeProducts);
+        return res.status(200).json({
+            page,
+            pages: Math.ceil(total / limit),
+            total,
+            data: safeProducts
+        });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Server error" });
