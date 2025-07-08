@@ -19,26 +19,34 @@ model User {
   Order        Order[]
 }
 
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  url       String
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
 model Product {
-  id          Int         @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   name        String
   price       Float
   description String?
-  featured    Boolean     @default(false)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  category   Category  @relation(fields: [categoryId], references: [id])
-  categoryId Int
+  featured    Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  category    Category       @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  images      ProductImage[]
   CartItem    CartItem[]
   OrderItem   OrderItem[]
 }
 
 model Category {
-  id        Int        @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
   products  Product[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Cart {

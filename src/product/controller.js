@@ -75,7 +75,10 @@ exports.getProducts = async (req, res) => {
                 take: limit,
                 where,
                 orderBy: { createdAt: "desc" },
-                include: { category: true }
+                include: {
+                    images: true,
+                    category: true
+                }
             }),
             prisma.product.count()
         ])
