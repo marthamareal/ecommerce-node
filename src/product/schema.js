@@ -16,7 +16,7 @@ const productOutPutSchema = z.object({
   price: z.number(),
   description: z.string().nullable().optional(),
   featured: z.boolean().optional(),
-  images: z.array(ProductImageOutPutSChema),
+  images: z.array(ProductImageOutPutSChema).nullable().optional(),
   category: CategoryOutputSchema,
   createdAt: z.date(),
   updatedAt: z.date()

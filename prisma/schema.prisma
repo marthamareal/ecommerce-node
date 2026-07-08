@@ -90,9 +90,10 @@ model OrderItem {
 }
 
 enum orderStatus {
-  PENDING
-  REJECTED
-  ACCEPTED
-  CANCLED
-  PROCESSED
+  PENDING      // Customer has placed the order.
+  ACCEPTED     // Shop has confirmed it can fulfill the order.
+  PROCESSING   // Being prepared/packed.
+  COMPLETED    // Customer has received or collected the order.
+  CANCELED    // Cancelled by customer.
+  REJECTED     // Shop declined the order (e.g., out of stock).
 }
