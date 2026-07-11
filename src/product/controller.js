@@ -42,13 +42,13 @@ exports.getProducts = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     const searchTerm = req.query.search || "" // search in product name
-    const category = req.query.category || "" // filtering by category
+    const category = req.query.category ? Number(req.query.category) : undefined // filtering by category
     const featured = req.query.featured // filtering featured products
     const minPrice = parseFloat(req.query.minPrice);
     const maxPrice = parseFloat(req.query.maxPrice);
 
     try {
-        // Construct a query to se in searching the product name and filtering by category.
+        // Construct a query to see in searching the product name and filtering by category.
         const where = {
             AND: [
                 {
@@ -57,7 +57,7 @@ exports.getProducts = async (req, res) => {
                         mode: "insensitive"
                     }
                 },
-                category ? { category: { name: category } } : {},
+                category ? { category: { id: category } } : {},
                 featured != undefined ? { featured: featured === "true" } : {},
                 isNaN(minPrice) || isNaN(maxPrice) ? {
                     price: {
@@ -80,7 +80,9 @@ exports.getProducts = async (req, res) => {
                     category: true
                 }
             }),
-            prisma.product.count()
+            prisma.product.count({
+                where,
+            }),
         ])
         const safeProducts = sanitize(products);
         return res.status(200).json({
