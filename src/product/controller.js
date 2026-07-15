@@ -51,20 +51,25 @@ exports.getProducts = async (req, res) => {
         // Construct a query to see in searching the product name and filtering by category.
         const where = {
             AND: [
-                {
-                    name: {
-                        contains: searchTerm,
-                        mode: "insensitive"
-                    }
-                },
                 category ? { category: { id: category } } : {},
                 featured != undefined ? { featured: featured === "true" } : {},
-                isNaN(minPrice) || isNaN(maxPrice) ? {
-                    price: {
-                        ...(minPrice ? { gte: minPrice } : {}),
-                        ...(maxPrice ? { lte: maxPrice } : {})
+                searchTerm
+                    ? {
+                        OR: [
+                            { name: { contains: searchTerm, mode: 'insensitive' } },
+                            { description: { contains: searchTerm, mode: 'insensitive' } },
+                            { category: { name: { contains: searchTerm, mode: 'insensitive' } } },
+                        ],
                     }
-                } : {}
+                    : {},
+                (minPrice || maxPrice)
+                    ? {
+                        price: {
+                            ...(minPrice ? { gte: Number(minPrice) } : {}),
+                            ...(maxPrice ? { lte: Number(maxPrice) } : {}),
+                        },
+                    }
+                    : {},
             ]
         }
 
