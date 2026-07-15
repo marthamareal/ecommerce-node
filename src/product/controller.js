@@ -38,11 +38,64 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.getProducts = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const searchTerm = req.query.search || "" // search in product name
+    const category = req.query.category ? Number(req.query.category) : undefined // filtering by category
+    const featured = req.query.featured // filtering featured products
+    const minPrice = parseFloat(req.query.minPrice);
+    const maxPrice = parseFloat(req.query.maxPrice);
+
     try {
+        // Construct a query to see in searching the product name and filtering by category.
+        const where = {
+            AND: [
+                category ? { category: { id: category } } : {},
+                featured != undefined ? { featured: featured === "true" } : {},
+                searchTerm
+                    ? {
+                        OR: [
+                            { name: { contains: searchTerm, mode: 'insensitive' } },
+                            { description: { contains: searchTerm, mode: 'insensitive' } },
+                            { category: { name: { contains: searchTerm, mode: 'insensitive' } } },
+                        ],
+                    }
+                    : {},
+                (minPrice || maxPrice)
+                    ? {
+                        price: {
+                            ...(minPrice ? { gte: Number(minPrice) } : {}),
+                            ...(maxPrice ? { lte: Number(maxPrice) } : {}),
+                        },
+                    }
+                    : {},
+            ]
+        }
+
         // Get products from the database
-        const products = await prisma.product.findMany({ include: { category: true } });
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                skip,
+                take: limit,
+                where,
+                orderBy: { createdAt: "desc" },
+                include: {
+                    images: true,
+                    category: true
+                }
+            }),
+            prisma.product.count({
+                where,
+            }),
+        ])
         const safeProducts = sanitize(products);
-        return res.status(200).json(safeProducts);
+        return res.status(200).json({
+            page,
+            pages: Math.ceil(total / limit),
+            total,
+            data: safeProducts
+        });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Server error" });
@@ -239,15 +292,46 @@ exports.getOrder = async (req, res) => {
 };
 
 exports.getOrders = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const dateFrom = req.query.dateFrom ? new Date(req.query.dateFrom) : null;
+    const dateTo = req.query.dateTo ? new Date(new Date(req.query.dateTo).setHours(23, 59, 59, 999)) : null;
+
     const userId = req.user.id;
     try {
-        const orders = await prisma.order.findMany({
-            where: { userId },
-            include: { items: true },
-        });
+        const where = {
+            userId,
+            AND: [
+                dateFrom || dateTo
+                    ? {
+                        createdAt: {
+                            ...(dateFrom ? { gte: dateFrom } : {}),
+                            ...(dateTo ? { lte: dateTo } : {}),
+                        },
+                    }
+                    : {}
+            ]
+        }
+        const [orders, total] = await Promise.all([
+            prisma.order.findMany({
+                skip,
+                take: limit,
+                where,
+                include: { items: true },
+                orderBy: { createdAt: "desc" },
+            }),
+            prisma.order.count({ where: { userId } })
+        ]);
         if (!orders)
             return res.status(404).json({ message: "No orders added yet" });
-        return res.status(200).json(orders);
+
+        return res.status(200).json({
+            page,
+            pages: Math.ceil(total / limit),
+            total,
+            data: orders
+        });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "Server error" });

@@ -5,12 +5,18 @@ const CategoryOutputSchema = z.object({
   name: z.string(),
 });
 
+const ProductImageOutPutSChema = z.object({
+  id: z.number(),
+  url: z.string().url,
+});
+
 const productOutPutSchema = z.object({
   id: z.number(),
   name: z.string(),
   price: z.number(),
   description: z.string().nullable().optional(),
   featured: z.boolean().optional(),
+  images: z.array(ProductImageOutPutSChema).nullable().optional(),
   category: CategoryOutputSchema,
   createdAt: z.date(),
   updatedAt: z.date()
