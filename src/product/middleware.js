@@ -2,7 +2,13 @@ const prisma = require("../db");
 
 const checkProductExists = async (req, res, next) => {
     const id = parseInt(req.params.id);
-    const product = await prisma.product.findUnique({ where: { id }, include: { category: true } });
+    const product = await prisma.product.findUnique({
+        where: { id },
+        include: {
+            category: true,
+            images: { orderBy: { id: "asc" } }
+        }
+    });
     if (!product)
         return res
             .status(404)

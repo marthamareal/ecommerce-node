@@ -81,7 +81,7 @@ exports.getProducts = async (req, res) => {
                 where,
                 orderBy: { createdAt: "desc" },
                 include: {
-                    images: true,
+                    images: { where: { isPrimary: true }, take: 1 },
                     category: true
                 }
             }),
@@ -104,6 +104,7 @@ exports.getProducts = async (req, res) => {
 
 exports.getProduct = async (req, res) => {
     try {
+        // The product in request is got from db in the checkProductExists middleware
         const product = req.product;
         const safeProduct = productOutPutSchema.parse(product);
         return res.status(200).json(safeProduct);
