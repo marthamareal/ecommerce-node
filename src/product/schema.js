@@ -7,8 +7,9 @@ const CategoryOutputSchema = z.object({
 
 const ProductImageOutPutSChema = z.object({
   id: z.number(),
+  position: z.number(),
   key: z.string().min(1),
-  url: z.string().url,
+  url: z.string().url(),
 });
 
 const productOutPutSchema = z.object({

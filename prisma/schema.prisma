@@ -27,6 +27,7 @@ model ProductImage {
   product   Product @relation(fields: [productId], references: [id])
   productId Int
   key       String
+  position  Int      @default(0)
   isPrimary Boolean  @default(false) // used for grid thumbnails, cart, etc.
   createdAt DateTime @default(now())
   updatedAt DateTime   @updatedAt

@@ -42,6 +42,7 @@ exports.createProduct = async (req, res) => {
                         productId: created.id,
                         key: img.key,
                         url: img.url,
+                        position: index,
                         isPrimary: index === 0,
                     })),
                 });

@@ -6,7 +6,7 @@ const checkProductExists = async (req, res, next) => {
         where: { id },
         include: {
             category: true,
-            images: { orderBy: { id: "asc" } }
+            images: { orderBy: { position: "asc" } }
         }
     });
     if (!product)
