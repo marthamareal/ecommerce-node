@@ -7,6 +7,7 @@ const CategoryOutputSchema = z.object({
 
 const ProductImageOutPutSChema = z.object({
   id: z.number(),
+  key: z.string().min(1),
   url: z.string().url,
 });
 
@@ -28,6 +29,7 @@ const productInPutSchema = z.object({
   featured: z.boolean().default(false),
   price: z.number().positive(" Price must be greater than 0"),
   description: z.string().nullable().optional(),
+  images: z.array(z.object({ url: z.string().url })).default([])
 });
 
 const cartSchema = z.object({

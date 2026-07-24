@@ -17,6 +17,9 @@ exports.getCategories = async (req, res) => {
     }
 };
 
+// Creates the Product row and its ProductImage rows in a single transaction.
+//  * The first image in the array becomes the cover(isPrimary) by convention —
+//  * the frontend controls order by the order it sends the array in.
 exports.createProduct = async (req, res) => {
     const validated = productInPutSchema.safeParse(req.body);
     if (!validated.success) {
@@ -24,11 +27,33 @@ exports.createProduct = async (req, res) => {
             .status(400)
             .json({ error: validated.error.flatten().fieldErrors });
     }
-    const data = validated.data;
+
+    const { images, ...productData } = validated.data;
 
     try {
-        // Create product in the database
-        const product = await prisma.product.create({ data, include: { category: true } });
+        const product = await prisma.$transaction(async (tx) => {
+            const created = await tx.product.create({
+                data: productData,
+            });
+
+            if (images.length > 0) {
+                await tx.productImage.createMany({
+                    data: images.map((img, index) => ({
+                        productId: created.id,
+                        key: img.key,
+                        url: img.url,
+                        isPrimary: index === 0,
+                    })),
+                });
+            }
+            // Re-fetch with images included so the response matches what the
+            // frontend needs to render immediately without a second request.
+            return tx.product.findUnique({
+                where: { id: created.id },
+                include: { category: true, images: { orderBy: { id: "asc" } } },
+            });
+        });
+
         const safeProduct = productOutPutSchema.parse(product);
         return res.status(201).json(safeProduct);
     } catch (err) {

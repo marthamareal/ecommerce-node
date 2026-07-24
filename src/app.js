@@ -15,6 +15,7 @@ app.use(cors({
 app.use("/api/users", require("./user/routes"));
 app.use("/api/auth", require("./auth/routes"));
 app.use("/api/products", require("./product/routes"));
+app.use("/api/uploads", require("./S3uploads"));
 
 
 module.exports = app
